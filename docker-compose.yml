@@ -1,0 +1,35 @@
+services:
+  pg_db:
+    container_name: AnonimValentinBot_db
+    image: postgres:16
+    env_file:
+      - ./.env
+    environment:
+      - POSTGRES_USER=${PG_USER}
+      - POSTGRES_PASSWORD=${PG_PASSWORD}
+      - POSTGRES_DB=${PG_DB}
+    restart: on-failure
+    ports:
+      - '5432:5432'
+    networks:
+      net_con:
+    volumes:
+      - ./pg_data:/var/lib/postgresql/data
+      - ./dumps/users_AnonimkaValentinka.sql:/docker-entrypoint-initdb.d/001_users.sql
+
+  bot:
+    container_name: AnonimValentinBot
+    build: .
+    command: python core/main.py
+    env_file:
+      - ./.env
+    depends_on:
+      - pg_db
+    restart: on-failure
+    networks:
+      net_con:
+
+
+networks:
+  net_con:
+    driver: bridge
